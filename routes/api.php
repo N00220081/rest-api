@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
   
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AppointmentController;
 
 // Sends a post request to create a new user in the database
 Route::post('/register', [AuthController::class, 'register']);
@@ -16,4 +17,12 @@ Route::post('/login', [AuthController::class, 'login']);
 // logout is defined within the middleware group because it requires the user to be authenticated
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/appointments', [AppointmentController::class, 'store']);
+    Route::get('/appointments', [AppointmentController::class, 'index']);
+    Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
+    Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
 });

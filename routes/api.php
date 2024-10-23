@@ -25,9 +25,12 @@ Route::apiResource('doctors', DoctorController::class);
 
 // Only doctor can access this
 Route::middleware('auth:sanctum')->group(function () {
-    // using apiResource as its a convenient way to define a set of RESTful routes for a resource controller
-    Route::apiResource('appointments', AppointmentController::class);
+    Route::middleware(['isDoctor'])->group(function () {
+        // using apiResource as its a convenient way to define a set of RESTful routes for a resource controller
+        Route::apiResource('appointments', AppointmentController::class);
+    });
 });
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('patients', PatientController::class);
 });

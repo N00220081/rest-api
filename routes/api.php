@@ -1,4 +1,4 @@
-<!-- Handles authentication of registration and logins -->
+<!--  -->
 
 <?php
   
@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
   
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\PatientController;
 
 // Sends a post request to create a new user in the database
 Route::post('/register', [AuthController::class, 'register']);
@@ -19,10 +21,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+Route::apiResource('doctors', DoctorController::class);
+
+// Only doctor can access this
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/appointments', [AppointmentController::class, 'store']);
-    Route::get('/appointments', [AppointmentController::class, 'index']);
-    Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
-    Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
-    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
+    // using apiResource as its a convenient way to define a set of RESTful routes for a resource controller
+    Route::apiResource('appointments', AppointmentController::class);
+});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('patients', PatientController::class);
 });

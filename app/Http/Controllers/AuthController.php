@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:128|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
+        Log::info('Validated user');
 
         // Create a new user instance
         $user = User::create([
@@ -31,6 +33,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password), // Hash the password before storing
         ]);
+        Log::info('Created user');
 
         // Return a response indicating success
         return response()->json(['message' => 'User registered successfully.'], 201);

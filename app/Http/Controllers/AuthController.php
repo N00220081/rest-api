@@ -24,20 +24,35 @@ class AuthController extends Controller
             'name' => 'required|string|max:128',
             'email' => 'required|string|email|max:128|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|string|in:doctor,patient',
         ]);
-        Log::info('Validated user');
+
 
         // Create a new user instance
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password), // Hash the password before storing
+            'role' => $request->role, // Hash the password before storing
         ]);
-        Log::info('Created user');
 
-        // Return a response indicating success
-        return response()->json(['message' => 'User registered successfully.'], 201);
+        if ($user->role === 'doctor') {
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            // Return a response indicating success
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'message' => 'Doctor registered successfully.'
+            ]);
+        }
+
+
+        return response()->json([
+            'message' => 'Patient register successfully'
+        ], 201);
     }
+
 
     /**
      * Log in the user and return a token.

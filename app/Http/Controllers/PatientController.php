@@ -4,72 +4,60 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 class PatientController extends Controller
 {
-    /**
-     * Display a listing of the patients.
-     */
-    public function index(): JsonResponse
+    // Get all patients
+    public function index()
     {
-        $patients = Patient::all();
-        return response()->json($patients);
+        return Patient::all();
     }
 
-    /**
-     * Store a newly created patient in storage.
-     */
-    public function store(Request $request): JsonResponse
+    // Create a new patient
+    public function store(Request $request)
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:128',
             'insurance' => 'nullable|string|max:255',
-            'email' => 'required|email|max:128',
-            'phone' => 'nullable|string|max:16',
-            'doctor_id' => 'required|exists:doctor,id',
+            'email' => 'required|string|email|unique:patients,email|max:128',
+            'phone' => 'required|string|unique:patients,phone|max:16',
+            'doctor_id' => 'required|exists:doctors,id', // Doctor must exist
         ]);
 
-        $patient = Patient::create($validatedData);
+        $patient = Patient::create($request->all());
+
         return response()->json($patient, 201);
     }
 
-    /**
-     * Display the specified patient.
-     */
-    public function show($id): JsonResponse
+    // Show a specific patient
+    public function show($id)
     {
-        $patient = Patient::findOrFail($id);
-        return response()->json($patient);
+        return Patient::findOrFail($id);
     }
 
-    /**
-     * Update the specified patient in storage.
-     */
-    public function update(Request $request, $id): JsonResponse
+    // Update a specific patient
+    public function update(Request $request, $id)
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
+        $request->validate([
             'name' => 'sometimes|required|string|max:128',
             'insurance' => 'nullable|string|max:255',
-            'email' => 'sometimes|required|email|max:128',
-            'phone' => 'nullable|string|max:16',
-            'doctor_id' => 'sometimes|required|exists,id',
+            'email' => 'sometimes|required|string|email|max:128',
+            'phone' => 'sometimes|required|string|max:16',
+            'doctor_id' => 'sometimes|required|exists:doctors,id', // Doctor must exist
         ]);
 
         $patient = Patient::findOrFail($id);
-        $patient->update($validatedData);
-        return response()->json($patient);
+        $patient->update($request->all());
+
+        return response()->json($patient, 200);
     }
 
-    /**
-     * Remove the specified patient from storage.
-     */
-    public function destroy($id): JsonResponse
+    // Delete a specific patient
+    public function destroy($id)
     {
         $patient = Patient::findOrFail($id);
         $patient->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Patient deleted successfully'], 204);
     }
 }

@@ -15,8 +15,9 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('logout', [AuthController::class, 'logout']);
 
 
-Route::apiResource('doctors', DoctorController::class);
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('doctors', DoctorController::class);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
         // using apiResource as its a convenient way to define a set of RESTful routes for a resource controller

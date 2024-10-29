@@ -15,14 +15,13 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:doctor,patient', // Ensure role is specified and valid
         ]);
 
+        // Create the user without a role
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => $request->role, // Set the specified role
         ]);
 
         return response()->json(['user' => $user], 201);
@@ -46,7 +45,6 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role // Include role in the response
                 ]
             ], 200);
         }

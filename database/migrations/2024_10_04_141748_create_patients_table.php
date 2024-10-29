@@ -16,7 +16,7 @@ return new class extends Migration
         $table->string('name', 128);
         $table->string('insurance', 255)->nullable();
         $table->string('email', 128)->unique();
-        $table->string('phone', 16)->unique();
+        $table->string('phone', length: 20)->nullable();
         $table->foreignId('doctor_id')->constrained()->onDelete('cascade'); // Assuming each patient is associated with a specific doctor
         $table->timestamps();
     });

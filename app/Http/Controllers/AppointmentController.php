@@ -8,40 +8,80 @@ use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    // Get all appointments for the authenticated user
+    /**
+     * Display a listing of the appointments.
+     */
     public function index()
     {
-        $user = Auth::user();
-
-        // Get appointments based on role
-        if ($user->role === 'doctor') {
-            $appointments = Appointment::where('doctor_id', $user->id)->get();
-        } else {
-            $appointments = Appointment::where('patient_id', $user->id)->get();
-        }
-
+        $appointments = Appointment::all(); // Show all appointments for any authenticated user
         return response()->json($appointments);
     }
-
-    // Create a new appointment (for doctors)
+    
+    /**
+     * Store a newly created appointment in storage.
+     */
     public function store(Request $request)
     {
         $user = Auth::user();
-        if ($user->role !== 'doctor') {
+
+        // Check if user is authenticated
+        if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $request->validate([
+        $validatedData = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'at' => 'required|date',
             'cost' => 'required|numeric',
-            'paid' => 'boolean',
+            'paid' => 'boolean'
         ]);
 
-        $appointment = Appointment::create(array_merge($request->all(), ['doctor_id' => $user->id]));
+        // Create the appointment
+        $appointment = Appointment::create([
+            'doctor_id' => $user->id,
+            'patient_id' => $validatedData['patient_id'],
+            'at' => $validatedData['at'],
+            'cost' => $validatedData['cost'],
+            'paid' => $validatedData['paid'] ?? false,
+        ]);
 
-        return response()->json($appointment, 201);
+        return response()->json($appointment, 201); // Return 201 on success
     }
 
-    // Other methods (show, update, destroy) can also check for user roles...
+    /**
+     * Display the specified appointment.
+     */
+    public function show($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        return response()->json($appointment);
+    }
+
+    /**
+     * Update the specified appointment in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'at' => 'sometimes|date',
+            'cost' => 'sometimes|numeric',
+            'paid' => 'sometimes|boolean',
+        ]);
+
+        $appointment = Appointment::findOrFail($id);
+        $appointment->update($validatedData);
+
+        return response()->json($appointment);
+    }
+
+    /**
+     * Remove the specified appointment from storage.
+     */
+    public function destroy($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        $appointment->delete();
+
+        return response()->json(['message' => 'Appointment deleted successfully']);
+    }
 }
